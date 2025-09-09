@@ -4,32 +4,35 @@
   <meta charset="UTF-8">
   <title>Dividir Gastos de Viaje</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Arial, sans-serif;
       background: #f8f9fa;
       margin: 0;
       padding: 0;
     }
     .container {
-      max-width: 700px;
+      max-width: 900px;
       margin: 20px auto;
       background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 12px #0001;
-      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px #0001;
+      padding: 28px;
     }
     h1, h2 { color: #0057b8; }
-    label { font-weight: bold; display: block; margin-top: 10px; }
-    input, select, textarea, button {
+    label { font-weight: 600; display: block; margin-top: 10px; }
+    input, select, textarea, button, .select-trip {
       margin-top: 5px;
       width: 100%;
       padding: 8px;
       border: 1px solid #b3c6e0;
       border-radius: 4px;
       box-sizing: border-box;
+      font-size: 1em;
     }
-    button {
+    button, .btn {
       background: #0057b8;
       color: #fff;
       font-weight: bold;
@@ -37,8 +40,11 @@
       cursor: pointer;
       border: none;
       transition: background 0.2s;
+      border-radius: 5px;
+      padding: 9px 0;
+      font-size: 1em;
     }
-    button:hover { background: #003d82; }
+    button:hover, .btn:hover { background: #003d82; }
     .delete-btn {
       background: #e74c3c;
       color: #fff;
@@ -83,6 +89,7 @@
       border-radius: 5px;
       margin: 6px 0;
       padding: 8px 12px;
+      box-shadow: 0 1px 3px #00000008;
     }
     .balances {
       background: #f0f8e7;
@@ -92,23 +99,94 @@
     }
     .balances .debt { color: #d32f2f; }
     .balances .credit { color: #388e3c; }
-    @media (max-width: 600px) {
+    .summary {
+      background: #f5f5f5;
+      border-radius: 5px;
+      padding: 10px;
+      margin: 10px 0;
+    }
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin: 12px 0;
+    }
+    .stat-card {
+      background: #eaf1f8;
+      border-radius: 8px;
+      padding: 12px 16px;
+      min-width: 160px;
+      box-shadow: 0 1px 3px #00000008;
+      flex: 1 1 200px;
+    }
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .filter-bar input, .filter-bar select {
+      width: auto;
+      min-width: 120px;
+      flex: 1 1 120px;
+    }
+    .trip-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+      align-items: center;
+    }
+    .trip-bar select, .trip-bar input {
+      width: auto;
+      min-width: 120px;
+      flex: 1 1 120px;
+    }
+    .icon-comida { color: #fbc02d; }
+    .icon-transporte { color: #1976d2; }
+    .icon-alojamiento { color: #43a047; }
+    .icon-entretenimiento { color: #e53935; }
+    .icon-otros { color: #757575; }
+    .dark-mode {
+      background: #23272f !important;
+      color: #fff !important;
+    }
+    .dark-mode .container, .dark-mode .tab, .dark-mode .stat-card, .dark-mode .expense, .dark-mode .person, .dark-mode .balances, .dark-mode .summary {
+      background: #23272f !important;
+      color: #fff !important;
+      border-color: #444 !important;
+    }
+    .dark-mode input, .dark-mode select, .dark-mode textarea {
+      background: #333 !important;
+      color: #fff !important;
+      border-color: #444 !important;
+    }
+    @media (max-width: 900px) {
       .container { padding: 8px; }
-      .expense, .person { flex-direction: column; align-items: stretch; }
-      .tabs { flex-direction: column; }
-      .tab { margin-bottom: 4px; }
+      .expense, .person, .stat-card { flex-direction: column; align-items: stretch; }
+      .filter-bar, .trip-bar { flex-direction: column; }
     }
   </style>
 </head>
 <body>
-<div class="container">
-  <h1>Dividir Gastos de Viaje</h1>
+<div class="container" id="mainContainer">
+  <h1><span class="material-icons" style="vertical-align:middle;font-size:32px;">account_balance_wallet</span> Dividir Gastos de Viaje</h1>
+  <!-- Barra de viajes -->
+  <div class="trip-bar">
+    <select id="tripSelect" class="select-trip"></select>
+    <input type="text" id="tripNameInput" placeholder="Nuevo viaje">
+    <button id="addTripBtn" class="btn"><span class="material-icons" style="vertical-align:middle;font-size:18px;">add</span> Crear</button>
+    <button id="copyLinkBtn" class="btn" style="background:#43a047;"><span class="material-icons" style="vertical-align:middle;font-size:18px;">share</span> Compartir enlace</button>
+    <button id="darkModeBtn" class="btn" style="background:#333;"><span class="material-icons" style="vertical-align:middle;font-size:18px;">brightness_4</span></button>
+  </div>
   <div class="tabs" id="tabs">
     <div class="tab active" onclick="openTab('viajeros')">1. Viajeros</div>
     <div class="tab" onclick="openTab('gastos')">2. Gastos</div>
     <div class="tab" onclick="openTab('balances')">3. Balances</div>
+    <div class="tab" onclick="openTab('historial')">4. Historial</div>
+    <div class="tab" onclick="openTab('stats')">5. Estadísticas</div>
   </div>
 
+  <!-- Pestaña 1: Viajeros -->
   <div id="tab-viajeros" class="tab-content active">
     <h2>Viajeros</h2>
     <label for="personName">Nombre:</label>
@@ -117,17 +195,18 @@
     <div class="list" id="personList"></div>
   </div>
 
+  <!-- Pestaña 2: Gastos -->
   <div id="tab-gastos" class="tab-content">
     <h2>Registrar Gasto</h2>
     <label for="expenseDescription">Descripción (opcional):</label>
     <input type="text" id="expenseDescription" placeholder="Ej: Almuerzo, Gasolina, etc.">
     <label for="expenseCategory">Categoría:</label>
     <select id="expenseCategory">
-      <option value="Comida">Comida</option>
-      <option value="Transporte">Transporte</option>
-      <option value="Alojamiento">Alojamiento</option>
-      <option value="Entretenimiento">Entretenimiento</option>
-      <option value="Otros">Otros</option>
+      <option value="Comida">🍽️ Comida</option>
+      <option value="Transporte">🚗 Transporte</option>
+      <option value="Alojamiento">🛏️ Alojamiento</option>
+      <option value="Entretenimiento">🎮 Entretenimiento</option>
+      <option value="Otros">💵 Otros</option>
     </select>
     <label for="expenseAmount">Monto ($):</label>
     <input type="number" id="expenseAmount" min="0" step="0.01" placeholder="0.00">
@@ -139,23 +218,62 @@
     <div class="list" id="expenseList"></div>
   </div>
 
+  <!-- Pestaña 3: Balances -->
   <div id="tab-balances" class="tab-content">
     <h2>Balances</h2>
     <button id="calcBalancesBtn">Calcular Balances</button>
     <div id="balancesSection"></div>
   </div>
+
+  <!-- Pestaña 4: Historial -->
+  <div id="tab-historial" class="tab-content">
+    <h2>Historial de Gastos</h2>
+    <div class="filter-bar">
+      <input type="text" id="filterDescription" placeholder="Buscar descripción">
+      <select id="filterCategory">
+        <option value="">Todas las categorías</option>
+        <option value="Comida">🍽️ Comida</option>
+        <option value="Transporte">🚗 Transporte</option>
+        <option value="Alojamiento">🛏️ Alojamiento</option>
+        <option value="Entretenimiento">🎮 Entretenimiento</option>
+        <option value="Otros">💵 Otros</option>
+      </select>
+      <input type="date" id="filterDateStart" placeholder="Desde">
+      <input type="date" id="filterDateEnd" placeholder="Hasta">
+      <button id="filterBtn">Filtrar</button>
+      <button id="clearFilterBtn">Limpiar</button>
+    </div>
+    <div class="list" id="historyList"></div>
+  </div>
+
+  <!-- Pestaña 5: Estadísticas -->
+  <div id="tab-stats" class="tab-content">
+    <h2>Estadísticas</h2>
+    <div class="stats" id="statsCards"></div>
+    <canvas id="statsChart" style="max-width:400px;max-height:220px;margin:0 auto;display:block;"></canvas>
+  </div>
 </div>
 
+<!-- Chart.js para gráficos -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   // --- Configuración de JSONBin ---
   const JSONBIN_URL = "https://api.jsonbin.io/v3/b/68c0a0d6d0ea881f4077edab";
-  const JSONBIN_MASTERKEY = ""; // Deja vacío para que cualquiera pueda editar
+  const JSONBIN_MASTERKEY = ""; // Deja vacío si no es privado
 
   // --- Estado global ---
   let people = [];
   let expenses = [];
+  let trips = []; // [{id, name}]
+  let currentTripId = null;
+  let darkMode = false;
 
   // --- Elementos DOM ---
+  const tripSelect = document.getElementById('tripSelect');
+  const tripNameInput = document.getElementById('tripNameInput');
+  const addTripBtn = document.getElementById('addTripBtn');
+  const copyLinkBtn = document.getElementById('copyLinkBtn');
+  const darkModeBtn = document.getElementById('darkModeBtn');
   const tabs = document.getElementById('tabs');
   const personNameInput = document.getElementById('personName');
   const addPersonBtn = document.getElementById('addPersonBtn');
@@ -169,13 +287,23 @@
   const expenseList = document.getElementById('expenseList');
   const calcBalancesBtn = document.getElementById('calcBalancesBtn');
   const balancesSection = document.getElementById('balancesSection');
+  const filterDescription = document.getElementById('filterDescription');
+  const filterCategory = document.getElementById('filterCategory');
+  const filterDateStart = document.getElementById('filterDateStart');
+  const filterDateEnd = document.getElementById('filterDateEnd');
+  const filterBtn = document.getElementById('filterBtn');
+  const clearFilterBtn = document.getElementById('clearFilterBtn');
+  const historyList = document.getElementById('historyList');
+  const statsCards = document.getElementById('statsCards');
+  const statsChartCtx = document.getElementById('statsChart').getContext('2d');
+  let statsChart = null;
 
   // --- Pestañas ---
   function openTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
     document.getElementById('tab-' + tabName).classList.add('active');
-    tabs.querySelector(`.tab:nth-child(${tabName==='viajeros'?1:tabName==='gastos'?2:3})`).classList.add('active');
+    tabs.querySelector(`.tab:nth-child(${tabName==='viajeros'?1:tabName==='gastos'?2:tabName==='balances'?3:tabName==='historial'?4:5})`).classList.add('active');
   }
 
   // --- Funciones de persistencia (JSONBin) ---
@@ -186,16 +314,18 @@
       });
       if (!resp.ok) throw new Error('Error al cargar');
       const data = await resp.json();
-      if (data.record && data.record.people && data.record.expenses) {
-        people = data.record.people;
-        expenses = data.record.expenses;
+      if (data.record && data.record.trips) {
+        trips = data.record.trips;
+      } else {
+        trips = [{id: 1, name: "Viaje 1"}];
       }
-      renderPeople();
-      renderExpenses();
-      renderBalances();
+      renderTrips();
+      if (currentTripId === null) currentTripId = trips[0].id;
+      selectTrip(currentTripId);
     } catch (e) {
-      alert('No se pudo cargar desde la nube. Usando datos locales.');
-      // Si no hay datos en la nube, inicia vacío
+      trips = [{id: 1, name: "Viaje 1"}];
+      currentTripId = 1;
+      renderTrips();
       renderPeople();
       renderExpenses();
       renderBalances();
@@ -209,12 +339,58 @@
           "Content-Type": "application/json",
           "X-Master-Key": JSONBIN_MASTERKEY
         },
-        body: JSON.stringify({ people, expenses })
+        body: JSON.stringify({ trips })
       });
     } catch (e) {
       alert('Error al guardar en la nube. Los datos se guardarán solo localmente.');
     }
   }
+
+  // --- Viajes ---
+  function renderTrips() {
+    tripSelect.innerHTML = '';
+    trips.forEach(trip => {
+      const opt = document.createElement('option');
+      opt.value = trip.id;
+      opt.textContent = trip.name;
+      tripSelect.appendChild(opt);
+    });
+    tripSelect.value = currentTripId;
+  }
+  function addTrip() {
+    const name = tripNameInput.value.trim();
+    if (!name) return alert('Ingresa un nombre');
+    if (trips.some(t => t.name === name)) return alert('Ese nombre ya existe');
+    const id = trips.length ? Math.max(...trips.map(t => t.id)) + 1 : 1;
+    trips.push({id, name});
+    tripNameInput.value = '';
+    currentTripId = id;
+    renderTrips();
+    saveToCloud();
+    selectTrip(id);
+  }
+  function selectTrip(tripId) {
+    currentTripId = tripId;
+    tripSelect.value = tripId;
+    const trip = trips.find(t => t.id === tripId);
+    if (!trip) return;
+    people = trip.people || [];
+    expenses = trip.expenses || [];
+    renderPeople();
+    renderExpenses();
+    renderBalances();
+    renderHistory();
+    renderStats();
+  }
+  window.removeTrip = function(id) {
+    if (!confirm('¿Eliminar este viaje y todos sus datos?')) return;
+    trips = trips.filter(t => t.id !== id);
+    if (trips.length === 0) trips = [{id: 1, name: "Viaje 1"}];
+    currentTripId = trips[0].id;
+    renderTrips();
+    saveToCloud();
+    selectTrip(currentTripId);
+  };
 
   // --- Gestión de Viajeros ---
   function renderPeople() {
@@ -228,7 +404,9 @@
     });
     renderExpenseForm();
     renderBalances();
-    saveToCloud();
+    renderHistory();
+    renderStats();
+    saveTripToCloud();
   }
   function addPerson() {
     const name = personNameInput.value.trim();
@@ -246,7 +424,9 @@
     renderPeople();
     renderExpenses();
     renderBalances();
-    saveToCloud();
+    renderHistory();
+    renderStats();
+    saveTripToCloud();
   };
 
   // --- Formulario de gastos ---
@@ -275,13 +455,15 @@
         const p = people.find(p => p.id === s.personId);
         return p ? `<b>${p.name}:</b> $${s.amount.toFixed(2)}` : '';
       }).join(', ');
+      const date = exp.date ? new Date(exp.date).toLocaleString() : '';
       const div = document.createElement('div');
       div.className = 'expense';
       div.innerHTML = `
         <span>
-          <b>${exp.desc ? exp.desc : '(sin descripción)'}</b> (${exp.cat})<br>
+          <b>${getIcon(exp.cat)} ${exp.desc ? exp.desc : '(sin descripción)'}</b> (${exp.cat})<br>
           <span style="font-size:0.95em">Pagado por: ${payer ? payer.name : ''}</span><br>
-          <span style="font-size:0.9em">Repartido: ${splitList}</span>
+          <span style="font-size:0.9em">Repartido: ${splitList}</span><br>
+          <span style="font-size:0.85em">${date}</span>
         </span>
         <button class="delete-btn" onclick="removeExpense(${exp.id})">Eliminar</button>
       `;
@@ -305,19 +487,26 @@
       split[split.length-1].amount += (amount - totalSplit);
     }
     const id = expenses.length ? Math.max(...expenses.map(e => e.id)) + 1 : 1;
-    expenses.push({id, desc, cat, amount, payerId, split});
+    expenses.push({
+      id, desc, cat, amount, payerId, split,
+      date: new Date().toISOString() // Fecha y hora
+    });
     expenseDescriptionInput.value = '';
     expenseAmountInput.value = '';
     Array.from(expenseSplitDiv.querySelectorAll('input[type=checkbox]')).forEach(cb => cb.checked = true);
     renderExpenses();
     renderBalances();
-    saveToCloud();
+    renderHistory();
+    renderStats();
+    saveTripToCloud();
   }
   window.removeExpense = function(id) {
     expenses = expenses.filter(e => e.id !== id);
     renderExpenses();
     renderBalances();
-    saveToCloud();
+    renderHistory();
+    renderStats();
+    saveTripToCloud();
   };
 
   // --- Balances: Quién debe pagar a quién ---
@@ -345,6 +534,7 @@
         balancesDiv.innerHTML += `<span>${p.name}: $0.00</span><br>`;
     });
     balancesSection.appendChild(balancesDiv);
+    // Simplificar pagos (minimizar transacciones)
     let debtors = people.map(p => ({
       id: p.id,
       name: p.name,
@@ -372,7 +562,7 @@
     if (payments.length) {
       let payDiv = document.createElement('div');
       payDiv.className = 'balances';
-      payDiv.innerHTML = '<b>Transacciones para cuadrar:</b><br>';
+      payDiv.innerHTML = '<b>Transacciones para cuadrar (simplificadas):</b><br>';
       payments.forEach(p => {
         payDiv.innerHTML += `<b>${p.from.name}</b> paga <b>$${p.amount.toFixed(2)}</b> a <b>${p.to.name}</b><br>`;
       });
@@ -380,16 +570,136 @@
     }
   }
 
+  // --- Historial y filtros ---
+  function renderHistory(filters={}) {
+    historyList.innerHTML = '';
+    let filtered = expenses;
+    if (filters.desc) filtered = filtered.filter(e => e.desc && e.desc.toLowerCase().includes(filters.desc.toLowerCase()));
+    if (filters.cat) filtered = filtered.filter(e => e.cat === filters.cat);
+    if (filters.start) filtered = filtered.filter(e => e.date && new Date(e.date) >= new Date(filters.start));
+    if (filters.end) filtered = filtered.filter(e => e.date && new Date(e.date) <= new Date(filters.end));
+    filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+    filtered.forEach(exp => {
+      const payer = people.find(p => p.id === exp.payerId);
+      const splitList = exp.split.map(s => {
+        const p = people.find(p => p.id === s.personId);
+        return p ? `<b>${p.name}:</b> $${s.amount.toFixed(2)}` : '';
+      }).join(', ');
+      const date = exp.date ? new Date(exp.date).toLocaleString() : '';
+      const div = document.createElement('div');
+      div.className = 'expense';
+      div.innerHTML = `
+        <span>
+          <b>${getIcon(exp.cat)} ${exp.desc ? exp.desc : '(sin descripción)'}</b> (${exp.cat})<br>
+          <span style="font-size:0.95em">Pagado por: ${payer ? payer.name : ''}</span><br>
+          <span style="font-size:0.9em">Repartido: ${splitList}</span><br>
+          <span style="font-size:0.85em">${date}</span>
+        </span>
+      `;
+      historyList.appendChild(div);
+    });
+  }
+  function filterHistory() {
+    renderHistory({
+      desc: filterDescription.value,
+      cat: filterCategory.value,
+      start: filterDateStart.value,
+      end: filterDateEnd.value
+    });
+  }
+  clearFilterBtn.onclick = () => {
+    filterDescription.value = '';
+    filterCategory.value = '';
+    filterDateStart.value = '';
+    filterDateEnd.value = '';
+    renderHistory();
+  };
+
+  // --- Estadísticas ---
+  function renderStats() {
+    statsCards.innerHTML = '';
+    // Total por categoría
+    let catTotals = {};
+    expenses.forEach(exp => {
+      catTotals[exp.cat] = (catTotals[exp.cat] || 0) + exp.amount;
+    });
+    // Total por persona
+    let personTotals = {};
+    people.forEach(p => personTotals[p.id] = 0);
+    expenses.forEach(exp => {
+      personTotals[exp.payerId] += exp.amount;
+      exp.split.forEach(s => personTotals[s.personId] += s.amount);
+    });
+    // Tarjetas
+    let totalGastos = expenses.reduce((a,e) => a+e.amount, 0);
+    let card1 = document.createElement('div');
+    card1.className = 'stat-card';
+    card1.innerHTML = `<b>Total del viaje:</b><br>$${totalGastos.toFixed(2)}`;
+    statsCards.appendChild(card1);
+    let card2 = document.createElement('div');
+    card2.className = 'stat-card';
+    card2.innerHTML = `<b>Total de gastos:</b><br>${expenses.length}`;
+    statsCards.appendChild(card2);
+    let card3 = document.createElement('div');
+    card3.className = 'stat-card';
+    card3.innerHTML = `<b>Viajeros:</b><br>${people.length}`;
+    statsCards.appendChild(card3);
+    // Grafico de categorias
+    if (statsChart) statsChart.destroy();
+    statsChart = new Chart(statsChartCtx, {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(catTotals),
+        datasets: [{
+          data: Object.values(catTotals),
+          backgroundColor: ['#fbc02d','#1976d2','#43a047','#e53935','#757575']
+        }]
+      },
+      options: { plugins: { legend: { position: 'bottom' } } }
+    });
+  }
+
+  // --- Utilidades ---
+  function getIcon(cat) {
+    if (cat === 'Comida') return '<span class="material-icons icon-comida" title="Comida">restaurant</span>';
+    if (cat === 'Transporte') return '<span class="material-icons icon-transporte" title="Transporte">directions_car</span>';
+    if (cat === 'Alojamiento') return '<span class="material-icons icon-alojamiento" title="Alojamiento">hotel</span>';
+    if (cat === 'Entretenimiento') return '<span class="material-icons icon-entretenimiento" title="Entretenimiento">sports_esports</span>';
+    return '<span class="material-icons icon-otros" title="Otros">attach_money</span>';
+  }
+  function saveTripToCloud() {
+    trips = trips.map(t => t.id === currentTripId ? {...t, people, expenses} : t);
+    saveToCloud();
+  }
+  function copyLink() {
+    const url = window.location.href.split('?')[0] + '?trip=' + currentTripId;
+    navigator.clipboard.writeText(url);
+    alert('¡Enlace copiado! Comparte este enlace con tus amigos.');
+  }
+  function toggleDarkMode() {
+    darkMode = !darkMode;
+    if (darkMode) document.getElementById('mainContainer').classList.add('dark-mode');
+    else document.getElementById('mainContainer').classList.remove('dark-mode');
+  }
+
   // --- Eventos ---
+  addTripBtn.addEventListener('click', addTrip);
+  tripSelect.addEventListener('change', e => selectTrip(parseInt(e.target.value)));
+  copyLinkBtn.addEventListener('click', copyLink);
+  darkModeBtn.addEventListener('click', toggleDarkMode);
   addPersonBtn.addEventListener('click', addPerson);
   personNameInput.addEventListener('keydown', e => { if (e.key === 'Enter') addPerson(); });
   addExpenseBtn.addEventListener('click', addExpense);
   expenseAmountInput.addEventListener('keydown', e => { if (e.key === 'Enter') addExpense(); });
   calcBalancesBtn.addEventListener('click', renderBalances);
+  filterBtn.addEventListener('click', filterHistory);
+  // Filtro por viaje en URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const tripParam = parseInt(urlParams.get('trip'));
+  if (tripParam) currentTripId = tripParam;
 
   // --- Inicialización ---
   loadFromCloud();
 </script>
 </body>
 </html>
-
