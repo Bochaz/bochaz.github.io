@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Dividir Gastos de Viaje</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Material Icons -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
     body {
@@ -20,6 +19,7 @@
       border-radius: 12px;
       box-shadow: 0 4px 24px #0001;
       padding: 28px;
+      position: relative;
     }
     h1, h2 { color: #0057b8; }
     label { font-weight: 600; display: block; margin-top: 10px; }
@@ -58,7 +58,11 @@
       display: flex;
       margin-bottom: 18px;
       border-bottom: 2px solid #b3c6e0;
+      overflow-x: auto;
+      scrollbar-width: thin;
+      -ms-overflow-style: none;
     }
+    .tabs::-webkit-scrollbar { display: none; }
     .tab {
       padding: 10px 22px;
       cursor: pointer;
@@ -70,6 +74,7 @@
       border: 1px solid #b3c6e0;
       border-bottom: none;
       transition: background 0.2s;
+      flex-shrink: 0;
     }
     .tab.active {
       background: #fff;
@@ -130,60 +135,100 @@
       min-width: 120px;
       flex: 1 1 120px;
     }
-    .trip-bar {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 18px;
-      align-items: center;
+    .trip-header {
+      position: absolute;
+      top: 28px;
+      right: 28px;
+      text-align: right;
+      z-index: 2;
     }
-    .trip-bar select, .trip-bar input {
-      width: auto;
-      min-width: 120px;
-      flex: 1 1 120px;
+    .trip-current {
+      font-size: 2em;
+      font-weight: bold;
+      color: #0057b8;
+      cursor: pointer;
+      margin-bottom: 2px;
+    }
+    .trip-menu {
+      display: none;
+      position: absolute;
+      top: 48px;
+      right: 0;
+      background: #fff;
+      border: 1px solid #b3c6e0;
+      border-radius: 6px;
+      box-shadow: 0 2px 12px #0002;
+      padding: 12px;
+      z-index: 3;
+      min-width: 220px;
+    }
+    .trip-header.open .trip-menu { display: block; }
+    .share-btn {
+      position: absolute;
+      top: 28px;
+      right: 170px;
+      background: #43a047;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 9px 14px;
+      font-size: 1.1em;
+      cursor: pointer;
+      margin-top: 0;
+      z-index: 2;
     }
     .icon-comida { color: #fbc02d; }
     .icon-transporte { color: #1976d2; }
     .icon-alojamiento { color: #43a047; }
     .icon-entretenimiento { color: #e53935; }
     .icon-otros { color: #757575; }
-    .dark-mode {
-      background: #23272f !important;
-      color: #fff !important;
+    .split-percent {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      margin-top: 4px;
     }
-    .dark-mode .container, .dark-mode .tab, .dark-mode .stat-card, .dark-mode .expense, .dark-mode .person, .dark-mode .balances, .dark-mode .summary {
-      background: #23272f !important;
-      color: #fff !important;
-      border-color: #444 !important;
-    }
-    .dark-mode input, .dark-mode select, .dark-mode textarea {
-      background: #333 !important;
-      color: #fff !important;
-      border-color: #444 !important;
+    .split-percent input {
+      width: 60px;
+      margin-right: 8px;
     }
     @media (max-width: 900px) {
       .container { padding: 8px; }
       .expense, .person, .stat-card { flex-direction: column; align-items: stretch; }
-      .filter-bar, .trip-bar { flex-direction: column; }
+      .filter-bar { flex-direction: column; }
+      .trip-header { top: 8px; right: 8px; }
+      .share-btn { top: 8px; right: 100px; }
+      .tabs { flex-wrap: nowrap; }
+      .tab { flex-shrink: 0; }
     }
   </style>
 </head>
 <body>
 <div class="container" id="mainContainer">
-  <h1><span class="material-icons" style="vertical-align:middle;font-size:32px;">account_balance_wallet</span> Dividir Gastos de Viaje</h1>
-  <!-- Barra de viajes -->
-  <div class="trip-bar">
-    <select id="tripSelect" class="select-trip"></select>
-    <input type="text" id="tripNameInput" placeholder="Nuevo viaje">
-    <button id="addTripBtn" class="btn"><span class="material-icons" style="vertical-align:middle;font-size:18px;">add</span> Crear</button>
-    <button id="copyLinkBtn" class="btn" style="background:#43a047;"><span class="material-icons" style="vertical-align:middle;font-size:18px;">share</span> Compartir enlace</button>
-    <button id="darkModeBtn" class="btn" style="background:#333;"><span class="material-icons" style="vertical-align:middle;font-size:18px;">brightness_4</span></button>
+  <!-- Botón Compartir Enlace -->
+  <button class="share-btn" id="copyLinkBtn" title="Compartir enlace">
+    <span class="material-icons" style="vertical-align:middle;font-size:20px;">share</span> Compartir
+  </button>
+  <!-- Viaje actual (arriba a la derecha) -->
+  <div class="trip-header" id="tripHeader">
+    <div class="trip-current" id="tripCurrent">Viaje 1</div>
+    <div class="trip-menu" id="tripMenu">
+      <input type="text" id="tripNameInput" placeholder="Nombre del viaje" style="width:100%;margin-bottom:6px;">
+      <button id="addTripBtn" class="btn" style="width:100%;"><span class="material-icons" style="vertical-align:middle;font-size:18px;">add</span> Crear viaje</button>
+    </div>
   </div>
+
+  <h1><span class="material-icons" style="vertical-align:middle;font-size:32px;">account_balance_wallet</span> Dividir Gastos de Viaje</h1>
   <div class="tabs" id="tabs">
     <div class="tab active" onclick="openTab('viajeros')">1. Viajeros</div>
     <div class="tab" onclick="openTab('gastos')">2. Gastos</div>
     <div class="tab" onclick="openTab('balances')">3. Balances</div>
     <div class="tab" onclick="openTab('historial')">4. Historial</div>
     <div class="tab" onclick="openTab('stats')">5. Estadísticas</div>
+    <!-- Flecha para scroll (solo en móvil) -->
+    <div class="tab" id="tabArrow" style="background:#fff;color:#0057b8;cursor:pointer;display:none;" title="Ver más pestañas">
+      <span class="material-icons">chevron_right</span>
+    </div>
   </div>
 
   <!-- Pestaña 1: Viajeros -->
@@ -214,6 +259,10 @@
     <select id="expensePayer"></select>
     <label>Repartido entre:</label>
     <div id="expenseSplit"></div>
+    <div style="margin-top:4px;">
+      <label><input type="checkbox" id="splitPercentCheck"> Repartir por porcentajes</label>
+      <div id="splitPercentDiv" style="display:none;margin-top:8px;"></div>
+    </div>
     <button id="addExpenseBtn">Agregar Gasto</button>
     <div class="list" id="expenseList"></div>
   </div>
@@ -254,7 +303,6 @@
   </div>
 </div>
 
-<!-- Chart.js para gráficos -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   // --- Configuración de JSONBin ---
@@ -264,22 +312,25 @@
   // --- Estado global ---
   let people = [];
   let expenses = [];
-  let trips = []; // [{id, name}]
+  let trips = [];
   let currentTripId = null;
-  let darkMode = false;
 
   // --- Elementos DOM ---
-  const tripSelect = document.getElementById('tripSelect');
+  const tripHeader = document.getElementById('tripHeader');
+  const tripCurrent = document.getElementById('tripCurrent');
+  const tripMenu = document.getElementById('tripMenu');
   const tripNameInput = document.getElementById('tripNameInput');
   const addTripBtn = document.getElementById('addTripBtn');
   const copyLinkBtn = document.getElementById('copyLinkBtn');
-  const darkModeBtn = document.getElementById('darkModeBtn');
   const tabs = document.getElementById('tabs');
+  const tabArrow = document.getElementById('tabArrow');
   const personNameInput = document.getElementById('personName');
   const addPersonBtn = document.getElementById('addPersonBtn');
   const personList = document.getElementById('personList');
   const expensePayerSelect = document.getElementById('expensePayer');
   const expenseSplitDiv = document.getElementById('expenseSplit');
+  const splitPercentCheck = document.getElementById('splitPercentCheck');
+  const splitPercentDiv = document.getElementById('splitPercentDiv');
   const expenseDescriptionInput = document.getElementById('expenseDescription');
   const expenseCategorySelect = document.getElementById('expenseCategory');
   const expenseAmountInput = document.getElementById('expenseAmount');
@@ -297,14 +348,34 @@
   const statsCards = document.getElementById('statsCards');
   const statsChartCtx = document.getElementById('statsChart').getContext('2d');
   let statsChart = null;
+  let percentValues = {}; // {personId: porcentaje}
 
   // --- Pestañas ---
   function openTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
     document.getElementById('tab-' + tabName).classList.add('active');
-    tabs.querySelector(`.tab:nth-child(${tabName==='viajeros'?1:tabName==='gastos'?2:tabName==='balances'?3:tabName==='historial'?4:5})`).classList.add('active');
+    let idx = tabName==='viajeros'?1:tabName==='gastos'?2:tabName==='balances'?3:tabName==='historial'?4:5;
+    tabs.querySelector(`.tab:nth-child(${idx})`).classList.add('active');
+    // Scroll a la pestaña en móviles
+    if (window.innerWidth < 600) {
+      tabs.scrollTo({left: (idx-1)*120, behavior: 'smooth'});
+    }
   }
+
+  // --- Flecha scroll en móviles ---
+  function showTabArrow() {
+    if (window.innerWidth < 600) {
+      tabArrow.style.display = 'block';
+      tabArrow.onclick = () => {
+        tabs.scrollBy({left: 160, behavior: 'smooth'});
+      };
+    } else {
+      tabArrow.style.display = 'none';
+    }
+  }
+  window.addEventListener('resize', showTabArrow);
+  showTabArrow();
 
   // --- Funciones de persistencia (JSONBin) ---
   async function loadFromCloud() {
@@ -319,6 +390,7 @@
       } else {
         trips = [{id: 1, name: "Viaje 1"}];
       }
+      if (trips.length === 0) trips = [{id: 1, name: "Viaje 1"}];
       renderTrips();
       if (currentTripId === null) currentTripId = trips[0].id;
       selectTrip(currentTripId);
@@ -326,9 +398,7 @@
       trips = [{id: 1, name: "Viaje 1"}];
       currentTripId = 1;
       renderTrips();
-      renderPeople();
-      renderExpenses();
-      renderBalances();
+      selectTrip(currentTripId);
     }
   }
   async function saveToCloud() {
@@ -342,20 +412,21 @@
         body: JSON.stringify({ trips })
       });
     } catch (e) {
-      alert('Error al guardar en la nube. Los datos se guardarán solo localmente.');
+      alert('Error al guardar en la nube.');
     }
   }
 
   // --- Viajes ---
   function renderTrips() {
-    tripSelect.innerHTML = '';
-    trips.forEach(trip => {
-      const opt = document.createElement('option');
-      opt.value = trip.id;
-      opt.textContent = trip.name;
-      tripSelect.appendChild(opt);
-    });
-    tripSelect.value = currentTripId;
+    tripCurrent.textContent = trips.find(t => t.id === currentTripId).name;
+    tripMenu.innerHTML = `
+      <input type="text" id="tripNameInput" placeholder="Nombre del viaje" style="width:100%;margin-bottom:6px;">
+      <button id="addTripBtn" class="btn" style="width:100%;"><span class="material-icons" style="vertical-align:middle;font-size:18px;">add</span> Crear viaje</button>
+    `;
+    addTripBtn.addEventListener('click', addTrip);
+  }
+  function toggleTripMenu() {
+    tripHeader.classList.toggle('open');
   }
   function addTrip() {
     const name = tripNameInput.value.trim();
@@ -368,10 +439,12 @@
     renderTrips();
     saveToCloud();
     selectTrip(id);
+    tripHeader.classList.remove('open');
   }
   function selectTrip(tripId) {
     currentTripId = tripId;
-    tripSelect.value = tripId;
+    tripCurrent.textContent = trips.find(t => t.id === tripId).name;
+    tripHeader.classList.remove('open');
     const trip = trips.find(t => t.id === tripId);
     if (!trip) return;
     people = trip.people || [];
@@ -391,6 +464,10 @@
     saveToCloud();
     selectTrip(currentTripId);
   };
+  // Click fuera del menú para cerrar
+  document.addEventListener('click', e => {
+    if (!tripHeader.contains(e.target)) tripHeader.classList.remove('open');
+  });
 
   // --- Gestión de Viajeros ---
   function renderPeople() {
@@ -429,7 +506,7 @@
     saveTripToCloud();
   };
 
-  // --- Formulario de gastos ---
+  // --- Formulario de gastos (con porcentajes) ---
   function renderExpenseForm() {
     expensePayerSelect.innerHTML = '';
     people.forEach(person => {
@@ -439,14 +516,32 @@
       expensePayerSelect.appendChild(opt);
     });
     expenseSplitDiv.innerHTML = '';
+    splitPercentDiv.innerHTML = '';
     people.forEach(person => {
       const label = document.createElement('label');
       label.innerHTML = `<input type="checkbox" value="${person.id}" checked> ${person.name}`;
       expenseSplitDiv.appendChild(label);
+
+      const div = document.createElement('div');
+      div.className = 'split-percent';
+      div.innerHTML = `
+        <input type="number" min="0" max="100" value="100" id="percent_${person.id}" style="width:60px;" disabled>
+        <span style="color:#0057b8;font-size:0.95em;">${person.name}</span>
+      `;
+      splitPercentDiv.appendChild(div);
     });
+    // Mostrar porcentajes si se marca
+    splitPercentCheck.onchange = () => {
+      splitPercentDiv.style.display = splitPercentCheck.checked ? 'block' : 'none';
+      if (!splitPercentCheck.checked) {
+        splitPercentDiv.querySelectorAll('input').forEach(i => i.disabled = true);
+      } else {
+        splitPercentDiv.querySelectorAll('input').forEach(i => i.disabled = false);
+      }
+    };
   }
 
-  // --- Gestión de gastos ---
+  // --- Gestión de gastos (con porcentajes) ---
   function renderExpenses() {
     expenseList.innerHTML = '';
     expenses.forEach(exp => {
@@ -477,22 +572,46 @@
     const amount = parseFloat(expenseAmountInput.value);
     if (isNaN(amount) || amount <= 0) return alert('Ingresa un monto válido');
     const payerId = parseInt(expensePayerSelect.value);
-    const split = Array.from(expenseSplitDiv.querySelectorAll('input[type=checkbox]:checked'))
+    let split = Array.from(expenseSplitDiv.querySelectorAll('input[type=checkbox]:checked'))
       .map(cb => ({personId: parseInt(cb.value), amount: 0}));
     if (!split.length) return alert('Selecciona al menos un viajero para repartir');
-    const splitAmount = amount / split.length;
-    split.forEach(s => s.amount = Math.round(splitAmount * 100) / 100);
-    let totalSplit = split.reduce((a,b) => a+b.amount, 0);
-    if (Math.abs(totalSplit - amount) > 0.01) {
-      split[split.length-1].amount += (amount - totalSplit);
+    // Porcentajes
+    if (splitPercentCheck.checked) {
+      let totalPercent = 0;
+      split.forEach(s => {
+        const p = people.find(p => p.id === s.personId);
+        const val = parseFloat(document.getElementById(`percent_${s.personId}`).value) || 0;
+        percentValues[s.personId] = val;
+        totalPercent += val;
+      });
+      if (Math.abs(totalPercent-100) > 0.1) return alert('La suma de porcentajes debe ser 100%');
+      split.forEach(s => {
+        s.amount = Math.round(amount * (percentValues[s.personId]/100) * 100)/100;
+      });
+      // Ajustar redondeo
+      let totalSplit = split.reduce((a,b) => a+b.amount, 0);
+      if (Math.abs(totalSplit - amount) > 0.01) {
+        split[split.length-1].amount += (amount - totalSplit);
+      }
+    } else {
+      // Igualitario
+      const splitAmount = amount / split.length;
+      split.forEach(s => s.amount = Math.round(splitAmount * 100) / 100);
+      let totalSplit = split.reduce((a,b) => a+b.amount, 0);
+      if (Math.abs(totalSplit - amount) > 0.01) {
+        split[split.length-1].amount += (amount - totalSplit);
+      }
     }
     const id = expenses.length ? Math.max(...expenses.map(e => e.id)) + 1 : 1;
     expenses.push({
       id, desc, cat, amount, payerId, split,
-      date: new Date().toISOString() // Fecha y hora
+      date: new Date().toISOString()
     });
     expenseDescriptionInput.value = '';
     expenseAmountInput.value = '';
+    splitPercentCheck.checked = false;
+    splitPercentDiv.style.display = 'none';
+    splitPercentDiv.querySelectorAll('input').forEach(i => i.disabled = true);
     Array.from(expenseSplitDiv.querySelectorAll('input[type=checkbox]')).forEach(cb => cb.checked = true);
     renderExpenses();
     renderBalances();
@@ -618,19 +737,16 @@
   // --- Estadísticas ---
   function renderStats() {
     statsCards.innerHTML = '';
-    // Total por categoría
     let catTotals = {};
     expenses.forEach(exp => {
       catTotals[exp.cat] = (catTotals[exp.cat] || 0) + exp.amount;
     });
-    // Total por persona
     let personTotals = {};
     people.forEach(p => personTotals[p.id] = 0);
     expenses.forEach(exp => {
       personTotals[exp.payerId] += exp.amount;
       exp.split.forEach(s => personTotals[s.personId] += s.amount);
     });
-    // Tarjetas
     let totalGastos = expenses.reduce((a,e) => a+e.amount, 0);
     let card1 = document.createElement('div');
     card1.className = 'stat-card';
@@ -644,7 +760,6 @@
     card3.className = 'stat-card';
     card3.innerHTML = `<b>Viajeros:</b><br>${people.length}`;
     statsCards.appendChild(card3);
-    // Grafico de categorias
     if (statsChart) statsChart.destroy();
     statsChart = new Chart(statsChartCtx, {
       type: 'doughnut',
@@ -676,17 +791,15 @@
     navigator.clipboard.writeText(url);
     alert('¡Enlace copiado! Comparte este enlace con tus amigos.');
   }
-  function toggleDarkMode() {
-    darkMode = !darkMode;
-    if (darkMode) document.getElementById('mainContainer').classList.add('dark-mode');
-    else document.getElementById('mainContainer').classList.remove('dark-mode');
+  function openTripMenu() {
+    tripHeader.classList.add('open');
   }
+  tripCurrent.onclick = openTripMenu;
 
   // --- Eventos ---
   addTripBtn.addEventListener('click', addTrip);
-  tripSelect.addEventListener('change', e => selectTrip(parseInt(e.target.value)));
+  tripNameInput.addEventListener('keydown', e => { if (e.key === 'Enter') addTrip(); });
   copyLinkBtn.addEventListener('click', copyLink);
-  darkModeBtn.addEventListener('click', toggleDarkMode);
   addPersonBtn.addEventListener('click', addPerson);
   personNameInput.addEventListener('keydown', e => { if (e.key === 'Enter') addPerson(); });
   addExpenseBtn.addEventListener('click', addExpense);
