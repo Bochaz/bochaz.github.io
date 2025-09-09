@@ -1,49 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-<script>
-  // --- Configuración de JSONBin ---
-  const JSONBIN_URL = "https://api.jsonbin.io/v3/b/68c0662c43b1c97be93cc809"; // <-- TU BIN ID
-  const JSONBIN_MASTERKEY = ""; // Si quieres proteger tu bin, crea una "Master Key" en jsonbin.io (opcional)
-  // --- Funciones para guardar/cargar ---
-  async function loadFromCloud() {
-    try {
-      const resp = await fetch(JSONBIN_URL + "/latest", {
-        headers: { "X-Master-Key": JSONBIN_MASTERKEY }
-      });
-      if (!resp.ok) throw new Error('Error al cargar');
-      const data = await resp.json();
-      if (data.record && data.record.people && data.record.expenses) {
-        people = data.record.people;
-        expenses = data.record.expenses;
-      }
-      renderPeople();
-      renderExpenses();
-      renderBalances();
-    } catch (e) {
-      alert('No se pudo cargar desde la nube. Usando datos locales.');
-      loadFromStorage();
-    }
-  }
-  async function saveToCloud() {
-    try {
-      await fetch(JSONBIN_URL, {
-        method: 'PUT',
-        headers: {
-          "Content-Type": "application/json",
-          "X-Master-Key": JSONBIN_MASTERKEY
-        },
-        body: JSON.stringify({ people, expenses })
-      });
-    } catch (e) {
-      alert('Error al guardar en la nube. Los datos se guardarán solo localmente.');
-      saveToStorage();
-    }
-  }
-  // --- Sustituir las funciones de persistencia ---
-  // Busca y reemplaza: saveToStorage -> saveToCloud
-  // Busca y reemplaza: loadFromStorage -> loadFromCloud
-  // Llama a `loadFromCloud()` en lugar de `loadFromStorage()` al inicio
-</script>
 
 <head>
   <meta charset="UTF-8">
@@ -444,6 +400,52 @@
 
   // --- Inicialización ---
   loadFromStorage();
+
+  <script>
+  // --- Configuración de JSONBin ---
+  const JSONBIN_URL = "https://api.jsonbin.io/v3/b/68c0662c43b1c97be93cc809"; // <-- TU BIN ID
+  const JSONBIN_MASTERKEY = ""; // Si quieres proteger tu bin, crea una "Master Key" en jsonbin.io (opcional)
+  // --- Funciones para guardar/cargar ---
+  async function loadFromCloud() {
+    try {
+      const resp = await fetch(JSONBIN_URL + "/latest", {
+        headers: { "X-Master-Key": JSONBIN_MASTERKEY }
+      });
+      if (!resp.ok) throw new Error('Error al cargar');
+      const data = await resp.json();
+      if (data.record && data.record.people && data.record.expenses) {
+        people = data.record.people;
+        expenses = data.record.expenses;
+      }
+      renderPeople();
+      renderExpenses();
+      renderBalances();
+    } catch (e) {
+      alert('No se pudo cargar desde la nube. Usando datos locales.');
+      loadFromStorage();
+    }
+  }
+  async function saveToCloud() {
+    try {
+      await fetch(JSONBIN_URL, {
+        method: 'PUT',
+        headers: {
+          "Content-Type": "application/json",
+          "X-Master-Key": JSONBIN_MASTERKEY
+        },
+        body: JSON.stringify({ people, expenses })
+      });
+    } catch (e) {
+      alert('Error al guardar en la nube. Los datos se guardarán solo localmente.');
+      saveToStorage();
+    }
+  }
+  // --- Sustituir las funciones de persistencia ---
+  // Busca y reemplaza: saveToStorage -> saveToCloud
+  // Busca y reemplaza: loadFromStorage -> loadFromCloud
+  // Llama a `loadFromCloud()` en lugar de `loadFromStorage()` al inicio
 </script>
+
 </body>
 </html>
+
