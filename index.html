@@ -12,13 +12,14 @@
     <button class="share-btn" id="copyLinkBtn" title="Compartir enlace">
       <span class="material-icons">share</span>
     </button>
-    <div class="trip-header" id="tripHeader">
-      <div class="trip-current" id="tripCurrent">Viaje 1</div>
-      <div class="trip-menu" id="tripMenu">
-        <input type="text" id="tripNameInput" placeholder="Nombre del viaje" style="width:100%;margin-bottom:6px;">
-        <button id="addTripBtn" class="btn" style="width:100%;"><span class="material-icons" style="vertical-align:middle;font-size:18px;">add</span> Crear viaje</button>
-      </div>
+    
+    <!-- MENÚ SIMPLIFICADO: Solo un viaje con nombre editable -->
+    <div style="text-align:right;margin-bottom:8px;">
+      <input type="text" id="tripNameInput" placeholder="Nombre del viaje" style="width:180px;display:inline-block;">
+      <button id="addTripBtn" class="btn" style="width:80px;display:inline-block;">Renombrar</button>
     </div>
+
+    
     <h1><span class="material-icons" style="vertical-align:middle;font-size:32px;">account_balance_wallet</span> Dividir Gastos de Viaje</h1>
     <div class="tabs" id="tabs">
       <div class="tab active" onclick="openTab('viajeros')">1. Viajeros</div>
@@ -96,3 +97,4 @@
   <script src="./app.js"></script>
 </body>
 </html>
+
