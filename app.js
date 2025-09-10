@@ -66,12 +66,18 @@ function renderHistory() { /* ... tu código ... */ }
 function filterHistory() { /* ... tu código ... */ }
 // --- Estadísticas ---
 function renderStats() {
-  // ... (tu código)
-  // getContext aquí:
+  statsCards.innerHTML = '';
+  // ... (tu código para calcular estadísticas)
   if (statsChart) statsChart.destroy();
+  // getContext aquí:
   const statsChartCtx = document.getElementById('statsChart').getContext('2d');
-  statsChart = new Chart(statsChartCtx, { /* ... */ });
+  statsChart = new Chart(statsChartCtx, {
+    type: 'doughnut',
+    data: { /* ... */ },
+    options: { /* ... */ }
+  });
 }
+
   
 // --- Utilidades ---
 function getIcon(cat) { /* ... tu código ... */ }
