@@ -4,10 +4,8 @@
   <meta charset="UTF-8">
   <title>Dividir Gastos de Viaje</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Material Icons -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <!-- Hoja de estilos externa -->
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
   <div class="container" id="mainContainer">
@@ -36,14 +34,80 @@
       </div>
     </div>
 
-    <!-- (Aquí van todas las pestañas: Viajeros, Gastos, Balances, Historial, Estadísticas) -->
-    <!-- ... (el contenido de las pestañas se mantiene igual, sin cambios) ... -->
+    <!-- Pestaña 1: Viajeros -->
+    <div id="tab-viajeros" class="tab-content active">
+      <h2>Viajeros</h2>
+      <label for="personName">Nombre:</label>
+      <input type="text" id="personName" placeholder="Nombre del viajero">
+      <button id="addPersonBtn">Agregar Viajero</button>
+      <div class="list" id="personList"></div>
+    </div>
 
+    <!-- Pestaña 2: Gastos -->
+    <div id="tab-gastos" class="tab-content">
+      <h2>Registrar Gasto</h2>
+      <label for="expenseDescription">Descripción (opcional):</label>
+      <input type="text" id="expenseDescription" placeholder="Ej: Almuerzo, Gasolina, etc.">
+      <label for="expenseCategory">Categoría:</label>
+      <select id="expenseCategory">
+        <option value="Comida">🍽️ Comida</option>
+        <option value="Transporte">🚗 Transporte</option>
+        <option value="Alojamiento">🛏️ Alojamiento</option>
+        <option value="Entretenimiento">🎮 Entretenimiento</option>
+        <option value="Otros">💵 Otros</option>
+      </select>
+      <label for="expenseAmount">Monto ($):</label>
+      <input type="number" id="expenseAmount" min="0" step="0.01" placeholder="0.00">
+      <label for="expensePayer">Pagado por:</label>
+      <select id="expensePayer"></select>
+      <label>Repartido entre:</label>
+      <div id="expenseSplit"></div>
+      <div style="margin-top:4px;">
+        <label><input type="checkbox" id="splitPercentCheck"> Repartir por porcentajes</label>
+        <div id="splitPercentDiv" style="display:none;margin-top:8px;"></div>
+      </div>
+      <button id="addExpenseBtn">Agregar Gasto</button>
+      <div class="list" id="expenseList"></div>
+    </div>
+
+    <!-- Pestaña 3: Balances -->
+    <div id="tab-balances" class="tab-content">
+      <h2>Balances</h2>
+      <button id="calcBalancesBtn">Calcular Balances</button>
+      <div id="balancesSection"></div>
+    </div>
+
+    <!-- Pestaña 4: Historial -->
+    <div id="tab-historial" class="tab-content">
+      <h2>Historial de Gastos</h2>
+      <div class="filter-bar">
+        <input type="text" id="filterDescription" placeholder="Buscar descripción">
+        <select id="filterCategory">
+          <option value="">Todas las categorías</option>
+          <option value="Comida">🍽️ Comida</option>
+          <option value="Transporte">🚗 Transporte</option>
+          <option value="Alojamiento">🛏️ Alojamiento</option>
+          <option value="Entretenimiento">🎮 Entretenimiento</option>
+          <option value="Otros">💵 Otros</option>
+        </select>
+        <input type="date" id="filterDateStart" placeholder="Desde">
+        <input type="date" id="filterDateEnd" placeholder="Hasta">
+        <button id="filterBtn">Filtrar</button>
+        <button id="clearFilterBtn">Limpiar</button>
+      </div>
+      <div class="list" id="historyList"></div>
+    </div>
+
+    <!-- Pestaña 5: Estadísticas -->
+    <div id="tab-stats" class="tab-content">
+      <h2>Estadísticas</h2>
+      <div class="stats" id="statsCards"></div>
+      <!-- CANVAS AGREGADO AQUÍ -->
+      <canvas id="statsChart" style="max-width:400px;max-height:220px;margin:0 auto;display:block;"></canvas>
+    </div>
   </div>
 
-  <!-- Chart.js para gráficos -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- JS externo -->
-  <script src="app.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
