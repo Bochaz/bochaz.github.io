@@ -9,11 +9,9 @@
 </head>
 <body>
   <div class="container" id="mainContainer">
-    <!-- Botón Compartir Enlace -->
     <button class="share-btn" id="copyLinkBtn" title="Compartir enlace">
       <span class="material-icons">share</span>
     </button>
-    <!-- Viaje actual (arriba a la derecha) -->
     <div class="trip-header" id="tripHeader">
       <div class="trip-current" id="tripCurrent">Viaje 1</div>
       <div class="trip-menu" id="tripMenu">
@@ -21,7 +19,6 @@
         <button id="addTripBtn" class="btn" style="width:100%;"><span class="material-icons" style="vertical-align:middle;font-size:18px;">add</span> Crear viaje</button>
       </div>
     </div>
-
     <h1><span class="material-icons" style="vertical-align:middle;font-size:32px;">account_balance_wallet</span> Dividir Gastos de Viaje</h1>
     <div class="tabs" id="tabs">
       <div class="tab active" onclick="openTab('viajeros')">1. Viajeros</div>
@@ -33,8 +30,6 @@
         <span class="material-icons">chevron_right</span>
       </div>
     </div>
-
-    <!-- Pestaña 1: Viajeros -->
     <div id="tab-viajeros" class="tab-content active">
       <h2>Viajeros</h2>
       <label for="personName">Nombre:</label>
@@ -42,8 +37,6 @@
       <button id="addPersonBtn">Agregar Viajero</button>
       <div class="list" id="personList"></div>
     </div>
-
-    <!-- Pestaña 2: Gastos -->
     <div id="tab-gastos" class="tab-content">
       <h2>Registrar Gasto</h2>
       <label for="expenseDescription">Descripción (opcional):</label>
@@ -69,15 +62,11 @@
       <button id="addExpenseBtn">Agregar Gasto</button>
       <div class="list" id="expenseList"></div>
     </div>
-
-    <!-- Pestaña 3: Balances -->
     <div id="tab-balances" class="tab-content">
       <h2>Balances</h2>
       <button id="calcBalancesBtn">Calcular Balances</button>
       <div id="balancesSection"></div>
     </div>
-
-    <!-- Pestaña 4: Historial -->
     <div id="tab-historial" class="tab-content">
       <h2>Historial de Gastos</h2>
       <div class="filter-bar">
@@ -97,16 +86,12 @@
       </div>
       <div class="list" id="historyList"></div>
     </div>
-
-    <!-- Pestaña 5: Estadísticas -->
     <div id="tab-stats" class="tab-content">
       <h2>Estadísticas</h2>
       <div class="stats" id="statsCards"></div>
-      <!-- CANVAS AGREGADO AQUÍ -->
       <canvas id="statsChart" style="max-width:400px;max-height:220px;margin:0 auto;display:block;"></canvas>
     </div>
   </div>
-
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="./app.js"></script>
 </body>
