@@ -3,17 +3,13 @@ document.addEventListener('DOMContentLoaded', function() {
   const JSONBIN_URL = "https://api.jsonbin.io/v3/b/68c0a0d6d0ea881f4077edab";
   const JSONBIN_MASTERKEY = "";
 
-  // --- Estado global ---
+  // --- Estado global (un solo viaje) ---
   let people = [];
   let expenses = [];
-  let trips = [];
-  let currentTripId = null;
+  let tripName = "Viaje 1";
   let percentValues = {};
 
   // --- Elementos DOM ---
-  const tripHeader = document.getElementById('tripHeader');
-  const tripCurrent = document.getElementById('tripCurrent');
-  const tripMenu = document.getElementById('tripMenu');
   const tripNameInput = document.getElementById('tripNameInput');
   const addTripBtn = document.getElementById('addTripBtn');
   const copyLinkBtn = document.getElementById('copyLinkBtn');
@@ -75,20 +71,27 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       if (!resp.ok) throw new Error('Error al cargar');
       const data = await resp.json();
-      if (data.record && data.record.trips) {
-        trips = data.record.trips;
-      } else {
-        trips = [{id: 1, name: "Viaje 1"}];
+      if (data.record) {
+        tripName = data.record.tripName || "Viaje 1";
+        people = data.record.people || [];
+        expenses = data.record.expenses || [];
       }
-      if (trips.length === 0) trips = [{id: 1, name: "Viaje 1"}];
-      renderTrips();
-      if (currentTripId === null) currentTripId = trips[0].id;
-      selectTrip(currentTripId);
+      tripNameInput.value = tripName;
+      renderPeople();
+      renderExpenses();
+      renderBalances();
+      renderHistory();
+      renderStats();
     } catch (e) {
-      trips = [{id: 1, name: "Viaje 1"}];
-      currentTripId = 1;
-      renderTrips();
-      selectTrip(currentTripId);
+      tripName = "Viaje 1";
+      people = [];
+      expenses = [];
+      tripNameInput.value = tripName;
+      renderPeople();
+      renderExpenses();
+      renderBalances();
+      renderHistory();
+      renderStats();
     }
   }
   async function saveToCloud() {
@@ -99,64 +102,19 @@ document.addEventListener('DOMContentLoaded', function() {
           "Content-Type": "application/json",
           "X-Master-Key": JSONBIN_MASTERKEY
         },
-        body: JSON.stringify({ trips })
+        body: JSON.stringify({ tripName, people, expenses })
       });
     } catch (e) {
       alert('Error al guardar en la nube.');
     }
   }
-
-  // --- Viajes ---
-  function renderTrips() {
-    tripCurrent.textContent = trips.find(t => t.id === currentTripId).name;
-    tripMenu.innerHTML = `
-      <input type="text" id="tripNameInput" placeholder="Nombre del viaje" style="width:100%;margin-bottom:6px;">
-      <button id="addTripBtn" class="btn" style="width:100%;"><span class="material-icons" style="vertical-align:middle;font-size:18px;">add</span> Crear viaje</button>
-    `;
-    addTripBtn.onclick = addTrip;
-  }
-  function toggleTripMenu() {
-    tripHeader.classList.toggle('open');
-  }
   function addTrip() {
     const name = tripNameInput.value.trim();
     if (!name) return alert('Ingresa un nombre');
-    if (trips.some(t => t.name === name)) return alert('Ese nombre ya existe');
-    const id = trips.length ? Math.max(...trips.map(t => t.id)) + 1 : 1;
-    trips.push({id, name});
-    tripNameInput.value = '';
-    currentTripId = id;
-    renderTrips();
+    tripName = name;
     saveToCloud();
-    selectTrip(id);
-    tripHeader.classList.remove('open');
+    alert('Nombre cambiado!');
   }
-  function selectTrip(tripId) {
-    currentTripId = tripId;
-    tripCurrent.textContent = trips.find(t => t.id === tripId).name;
-    tripHeader.classList.remove('open');
-    const trip = trips.find(t => t.id === tripId);
-    if (!trip) return;
-    people = trip.people || [];
-    expenses = trip.expenses || [];
-    renderPeople();
-    renderExpenses();
-    renderBalances();
-    renderHistory();
-    renderStats();
-  }
-  window.removeTrip = function(id) {
-    if (!confirm('¿Eliminar este viaje y todos sus datos?')) return;
-    trips = trips.filter(t => t.id !== id);
-    if (trips.length === 0) trips = [{id: 1, name: "Viaje 1"}];
-    currentTripId = trips[0].id;
-    renderTrips();
-    saveToCloud();
-    selectTrip(currentTripId);
-  };
-  document.addEventListener('click', e => {
-    if (!tripHeader.contains(e.target)) tripHeader.classList.remove('open');
-  });
 
   // --- Gestión de Viajeros ---
   function renderPeople() {
@@ -172,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
     renderBalances();
     renderHistory();
     renderStats();
-    saveTripToCloud();
+    saveToCloud();
   }
   function addPerson() {
     const name = personNameInput.value.trim();
@@ -192,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
     renderBalances();
     renderHistory();
     renderStats();
-    saveTripToCloud();
+    saveToCloud();
   };
 
   // --- Formulario de gastos ---
@@ -305,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function() {
     renderBalances();
     renderHistory();
     renderStats();
-    saveTripToCloud();
+    saveToCloud();
   }
   window.removeExpense = function(id) {
     expenses = expenses.filter(e => e.id !== id);
@@ -313,7 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
     renderBalances();
     renderHistory();
     renderStats();
-    saveTripToCloud();
+    saveToCloud();
   };
 
   // --- Balances ---
@@ -471,19 +429,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (cat === 'Entretenimiento') return '<span class="material-icons icon-entretenimiento" title="Entretenimiento">sports_esports</span>';
     return '<span class="material-icons icon-otros" title="Otros">attach_money</span>';
   }
-  function saveTripToCloud() {
-    trips = trips.map(t => t.id === currentTripId ? {...t, people, expenses} : t);
-    saveToCloud();
-  }
   function copyLink() {
-    const url = window.location.href.split('?')[0] + '?trip=' + currentTripId;
+    const url = window.location.href.split('?')[0];
     navigator.clipboard.writeText(url);
     alert('¡Enlace copiado! Comparte este enlace con tus amigos.');
   }
-  function openTripMenu() {
-    tripHeader.classList.add('open');
-  }
-  tripCurrent.onclick = openTripMenu;
 
   // --- Eventos ---
   addPersonBtn.onclick = addPerson;
@@ -493,10 +443,8 @@ document.addEventListener('DOMContentLoaded', function() {
   calcBalancesBtn.onclick = renderBalances;
   filterBtn.onclick = filterHistory;
   copyLinkBtn.onclick = copyLink;
-  // Filtro por viaje en URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const tripParam = parseInt(urlParams.get('trip'));
-  if (tripParam) currentTripId = tripParam;
+  addTripBtn.onclick = addTrip;
+  tripNameInput.addEventListener('keydown', e => { if (e.key === 'Enter') addTrip(); });
 
   // --- Inicialización ---
   loadFromCloud();
