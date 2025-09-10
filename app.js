@@ -3,12 +3,12 @@ document.addEventListener('DOMContentLoaded', function() {
   const JSONBIN_URL = "https://api.jsonbin.io/v3/b/68c0a0d6d0ea881f4077edab";
   const JSONBIN_MASTERKEY = "";
 
-  // --- Estado global (versión simple: un solo viaje) ---
+  // --- Estado global ---
   let people = [];
   let expenses = [];
-  let tripName = "Viaje 1"; // <-- Un solo viaje
-  let percentValues = {};   // <-- Lo necesitas para los porcentajes de los gastos
-
+  let trips = [];
+  let currentTripId = null;
+  let percentValues = {};
 
   // --- Elementos DOM ---
   const tripHeader = document.getElementById('tripHeader');
@@ -67,58 +67,44 @@ document.addEventListener('DOMContentLoaded', function() {
   window.addEventListener('resize', showTabArrow);
   showTabArrow();
 
-// --- Funciones de persistencia (JSONBin) ---
-async function loadFromCloud() {
-  try {
-    const resp = await fetch(JSONBIN_URL + "/latest", {
-      headers: { "X-Master-Key": JSONBIN_MASTERKEY }
-    });
-    if (!resp.ok) throw new Error('Error al cargar');
-    const data = await resp.json();
-    if (data.record) {
-      tripName = data.record.tripName || "Viaje 1";
-      people = data.record.people || [];
-      expenses = data.record.expenses || [];
+  // --- Funciones de persistencia (JSONBin) ---
+  async function loadFromCloud() {
+    try {
+      const resp = await fetch(JSONBIN_URL + "/latest", {
+        headers: { "X-Master-Key": JSONBIN_MASTERKEY }
+      });
+      if (!resp.ok) throw new Error('Error al cargar');
+      const data = await resp.json();
+      if (data.record && data.record.trips) {
+        trips = data.record.trips;
+      } else {
+        trips = [{id: 1, name: "Viaje 1"}];
+      }
+      if (trips.length === 0) trips = [{id: 1, name: "Viaje 1"}];
+      renderTrips();
+      if (currentTripId === null) currentTripId = trips[0].id;
+      selectTrip(currentTripId);
+    } catch (e) {
+      trips = [{id: 1, name: "Viaje 1"}];
+      currentTripId = 1;
+      renderTrips();
+      selectTrip(currentTripId);
     }
-    tripNameInput.value = tripName;
-    renderPeople();
-    renderExpenses();
-    renderBalances();
-    renderHistory();
-    renderStats();
-  } catch (e) {
-    tripName = "Viaje 1";
-    people = [];
-    expenses = [];
-    tripNameInput.value = tripName;
-    renderPeople();
-    renderExpenses();
-    renderBalances();
-    renderHistory();
-    renderStats();
   }
-}
-async function saveToCloud() {
-  try {
-    await fetch(JSONBIN_URL, {
-      method: 'PUT',
-      headers: {
-        "Content-Type": "application/json",
-        "X-Master-Key": JSONBIN_MASTERKEY
-      },
-      body: JSON.stringify({ tripName, people, expenses })
-    });
-  } catch (e) {
-    alert('Error al guardar en la nube.');
+  async function saveToCloud() {
+    try {
+      await fetch(JSONBIN_URL, {
+        method: 'PUT',
+        headers: {
+          "Content-Type": "application/json",
+          "X-Master-Key": JSONBIN_MASTERKEY
+        },
+        body: JSON.stringify({ trips })
+      });
+    } catch (e) {
+      alert('Error al guardar en la nube.');
+    }
   }
-}
-function addTrip() {
-  const name = tripNameInput.value.trim();
-  if (!name) return alert('Ingresa un nombre');
-  tripName = name;
-  saveToCloud();
-  alert('Nombre cambiado!');
-}
 
   // --- Viajes ---
   function renderTrips() {
@@ -500,9 +486,13 @@ function addTrip() {
   tripCurrent.onclick = openTripMenu;
 
   // --- Eventos ---
-  addTripBtn.onclick = addTrip;
-  tripNameInput.addEventListener('keydown', e => { if (e.key === 'Enter') addTrip(); });
-  
+  addPersonBtn.onclick = addPerson;
+  personNameInput.addEventListener('keydown', e => { if (e.key === 'Enter') addPerson(); });
+  addExpenseBtn.onclick = addExpense;
+  expenseAmountInput.addEventListener('keydown', e => { if (e.key === 'Enter') addExpense(); });
+  calcBalancesBtn.onclick = renderBalances;
+  filterBtn.onclick = filterHistory;
+  copyLinkBtn.onclick = copyLink;
   // Filtro por viaje en URL
   const urlParams = new URLSearchParams(window.location.search);
   const tripParam = parseInt(urlParams.get('trip'));
