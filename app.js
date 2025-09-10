@@ -43,7 +43,49 @@ document.addEventListener('DOMContentLoaded', function() {
   const statsCards = document.getElementById('statsCards');
   let statsChart = null; // <-- getContext se moverá a renderStats
 
-  // --- (Aquí va todo el resto del JS: viajes, viajeros, gastos, balances, historial, stats) ---
+  // --- Viajes ---
+async function loadFromCloud() { /* ... tu código ... */ }
+async function saveToCloud() { /* ... tu código ... */ }
+function renderTrips() { /* ... tu código ... */ }
+function addTrip() { /* ... tu código ... */ }
+function selectTrip() { /* ... tu código ... */ }
+// --- Viajeros ---
+function renderPeople() { /* ... tu código ... */ }
+function addPerson() { /* ... tu código ... */ }
+window.removePerson = function(id) { /* ... tu código ... */ };
+// --- Gastos ---
+function renderExpenseForm() { /* ... tu código ... */ }
+function renderExpenses() { /* ... tu código ... */ }
+function addExpense() { /* ... tu código ... */ }
+window.removeExpense = function(id) { /* ... tu código ... */ };
+
+// --- Balances ---
+function renderBalances() { /* ... tu código ... */ }
+// --- Historial ---
+function renderHistory() { /* ... tu código ... */ }
+function filterHistory() { /* ... tu código ... */ }
+// --- Estadísticas ---
+function renderStats() {
+  // ... (tu código)
+  // getContext aquí:
+  if (statsChart) statsChart.destroy();
+  const statsChartCtx = document.getElementById('statsChart').getContext('2d');
+  statsChart = new Chart(statsChartCtx, { /* ... */ });
+}
+  
+// --- Utilidades ---
+function getIcon(cat) { /* ... tu código ... */ }
+function saveTripToCloud() { /* ... tu código ... */ }
+function copyLink() { /* ... tu código ... */ }
+// --- Eventos ---
+document.getElementById('addPersonBtn').onclick = addPerson;
+document.getElementById('addTripBtn').onclick = addTrip;
+document.getElementById('copyLinkBtn').onclick = copyLink;
+// ... (otros eventos)
+// --- Inicialización ---
+loadFromCloud();
+
+  
   // --- Pestañas ---
   function openTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
